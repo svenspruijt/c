@@ -55,4 +55,20 @@ public class AuthService {
             throw new BadCredentialsException("Invalid username or password", e);
         }
     }
+
+    public String validateToken(String token) {
+        // Extract username from token (this will throw an exception if token is
+        // malformed)
+        String username = jwtService.extractUsername(token);
+
+        // Load user details
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        // Validate token against user details
+        if (!jwtService.isTokenValid(token, userDetails)) {
+            throw new RuntimeException("Token is invalid or expired");
+        }
+
+        return username;
+    }
 }

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -18,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
@@ -34,45 +36,11 @@ public class SecurityConfig {
         http
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+                        // Public endpoints - only auth endpoints are public
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/api-docs/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                        // User management endpoints - only BEHEER role
-                        .requestMatchers(HttpMethod.POST, "/users").hasRole("BEHEER")
-                        .requestMatchers(HttpMethod.GET, "/users").hasRole("BEHEER")
-
-                        // General access for authenticated users
-                        .requestMatchers(HttpMethod.GET, "/customers/**").hasAnyRole("MEDEWERKER", "MONTEUR", "BEHEER")
-                        .requestMatchers(HttpMethod.POST, "/customers/**").hasAnyRole("MEDEWERKER", "MONTEUR", "BEHEER")
-                        .requestMatchers(HttpMethod.PUT, "/customers/**").hasAnyRole("MEDEWERKER", "MONTEUR", "BEHEER")
-
-                        .requestMatchers(HttpMethod.GET, "/cars/**").hasAnyRole("MEDEWERKER", "MONTEUR", "BEHEER")
-                        .requestMatchers(HttpMethod.POST, "/cars/**").hasAnyRole("MEDEWERKER", "MONTEUR", "BEHEER")
-                        .requestMatchers(HttpMethod.PUT, "/cars/**").hasAnyRole("MEDEWERKER", "MONTEUR", "BEHEER")
-
-                        // Parts and actions - read for all, modify only for BEHEER
-                        .requestMatchers(HttpMethod.GET, "/parts/**").hasAnyRole("MEDEWERKER", "MONTEUR", "BEHEER")
-                        .requestMatchers(HttpMethod.POST, "/parts/**").hasRole("BEHEER")
-                        .requestMatchers(HttpMethod.PUT, "/parts/**").hasRole("BEHEER")
-                        .requestMatchers(HttpMethod.DELETE, "/parts/**").hasRole("BEHEER")
-
-                        .requestMatchers(HttpMethod.GET, "/actions/**").hasAnyRole("MEDEWERKER", "MONTEUR", "BEHEER")
-                        .requestMatchers(HttpMethod.POST, "/actions/**").hasRole("BEHEER")
-                        .requestMatchers(HttpMethod.PUT, "/actions/**").hasRole("BEHEER")
-                        .requestMatchers(HttpMethod.DELETE, "/actions/**").hasRole("BEHEER")
-
-                        // Inspections and repairs - only MONTEUR and BEHEER
-                        .requestMatchers("/inspections/**").hasAnyRole("MONTEUR", "BEHEER")
-                        .requestMatchers("/repairs/**").hasAnyRole("MONTEUR", "BEHEER")
-
-                        // Receipts - all authenticated users
-                        .requestMatchers("/receipts/**").hasAnyRole("MEDEWERKER", "MONTEUR", "BEHEER")
-
-                        // Documents - all authenticated users
-                        .requestMatchers("/documents/**").hasAnyRole("MEDEWERKER", "MONTEUR", "BEHEER")
-
-                        // All other requests require authentication
+                        // Everything else requires authentication
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable())
