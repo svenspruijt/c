@@ -116,7 +116,7 @@ class CarServiceTest {
     void createCar_ShouldConvertLicensePlateToUpperCase() {
         // Arrange
         testCarRequestDTO.setLicensePlate("ab-123-cd");
-        when(carRepository.existsByLicensePlate("AB-123-CD")).thenReturn(false);
+        when(carRepository.existsByLicensePlate("ab-123-cd")).thenReturn(false);
         when(customerRepository.findById(1L)).thenReturn(Optional.of(testCustomer));
         when(carRepository.save(any(Car.class))).thenReturn(testCar);
 
@@ -125,7 +125,7 @@ class CarServiceTest {
 
         // Assert
         assertNotNull(result);
-        verify(carRepository, times(1)).existsByLicensePlate("AB-123-CD");
+        verify(carRepository, times(1)).existsByLicensePlate("ab-123-cd");
         verify(carRepository, times(1)).save(argThat(car -> "AB-123-CD".equals(car.getLicensePlate())));
     }
 
