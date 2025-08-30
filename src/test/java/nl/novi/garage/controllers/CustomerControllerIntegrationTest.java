@@ -214,17 +214,37 @@ class CustomerControllerIntegrationTest {
         }
 
         @Test
-        void getCustomerByPhoneNumber_ShouldReturnCustomer_WhenPhoneNumberExists() throws Exception {
+        void searchCustomersByPhone_ShouldReturnCustomer_WhenPhoneNumberExists() throws Exception {
                 // Arrange
                 when(customerService.getCustomerByPhoneNumber("+31612345678")).thenReturn(customerResponseDTO);
 
                 // Act & Assert
-                mockMvc.perform(get("/customers/phone/+31612345678"))
+                mockMvc.perform(get("/customers/search")
+                                .param("phone", "+31612345678"))
                                 .andExpect(status().isOk())
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                                .andExpect(jsonPath("$.phonenumber").value("+31612345678"));
+                                .andExpect(jsonPath("$.length()").value(1))
+                                .andExpect(jsonPath("$[0].phonenumber").value("+31612345678"));
 
                 verify(customerService, times(1)).getCustomerByPhoneNumber("+31612345678");
+        }
+
+        @Test
+        void searchCustomersByPhone_ShouldHandleUrlEncodedPhone_WhenPlusSymbolInPhone() throws Exception {
+                // Arrange - simulate what happens when + gets URL encoded to space
+                String urlEncodedPhone = " 31612345678"; // + becomes space in URL
+                String expectedDecodedPhone = "+31612345678";
+                when(customerService.getCustomerByPhoneNumber(expectedDecodedPhone)).thenReturn(customerResponseDTO);
+
+                // Act & Assert
+                mockMvc.perform(get("/customers/search")
+                                .param("phone", urlEncodedPhone))
+                                .andExpect(status().isOk())
+                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$.length()").value(1))
+                                .andExpect(jsonPath("$[0].phonenumber").value("+31612345678"));
+
+                verify(customerService, times(1)).getCustomerByPhoneNumber(expectedDecodedPhone);
         }
 
         @Test

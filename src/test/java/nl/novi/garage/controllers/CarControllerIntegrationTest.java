@@ -148,16 +148,18 @@ class CarControllerIntegrationTest {
         }
 
         @Test
-        void getCarByLicensePlate_ShouldReturnCar_WhenLicensePlateExists() throws Exception {
+        void searchCarsByLicensePlate_ShouldReturnCar_WhenLicensePlateExists() throws Exception {
                 // Arrange
                 when(carService.getCarByLicensePlate("AB-123-CD")).thenReturn(carResponseDTO);
 
                 // Act & Assert
-                mockMvc.perform(get("/cars/license-plate/AB-123-CD"))
+                mockMvc.perform(get("/cars/search")
+                                .param("licensePlate", "AB-123-CD"))
                                 .andExpect(status().isOk())
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                                .andExpect(jsonPath("$.licensePlate").value("AB-123-CD"))
-                                .andExpect(jsonPath("$.brand").value("Toyota"));
+                                .andExpect(jsonPath("$.length()").value(1))
+                                .andExpect(jsonPath("$[0].licensePlate").value("AB-123-CD"))
+                                .andExpect(jsonPath("$[0].brand").value("Toyota"));
 
                 verify(carService, times(1)).getCarByLicensePlate("AB-123-CD");
         }
@@ -225,29 +227,14 @@ class CarControllerIntegrationTest {
         }
 
         @Test
-        void searchCarsByBrand_ShouldReturnMatchingCars() throws Exception {
-                // Arrange
-                List<CarResponseDTO> cars = Arrays.asList(carResponseDTO);
-                when(carService.searchCarsByBrand("Toyota")).thenReturn(cars);
-
-                // Act & Assert
-                mockMvc.perform(get("/cars/search/brand/Toyota"))
-                                .andExpect(status().isOk())
-                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                                .andExpect(jsonPath("$.length()").value(1))
-                                .andExpect(jsonPath("$[0].brand").value("Toyota"));
-
-                verify(carService, times(1)).searchCarsByBrand("Toyota");
-        }
-
-        @Test
-        void searchCarsByModel_ShouldReturnMatchingCars() throws Exception {
+        void searchCars_ShouldSearchByModel_WhenModelParameterProvided() throws Exception {
                 // Arrange
                 List<CarResponseDTO> cars = Arrays.asList(carResponseDTO);
                 when(carService.searchCarsByModel("Corolla")).thenReturn(cars);
 
                 // Act & Assert
-                mockMvc.perform(get("/cars/search/model/Corolla"))
+                mockMvc.perform(get("/cars/search")
+                                .param("model", "Corolla"))
                                 .andExpect(status().isOk())
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(jsonPath("$.length()").value(1))
@@ -310,8 +297,7 @@ class CarControllerIntegrationTest {
         @Test
         void searchCars_ShouldSearchByLicensePlate_WhenLicensePlateParameterProvided() throws Exception {
                 // Arrange
-                List<CarResponseDTO> cars = Arrays.asList(carResponseDTO);
-                when(carService.searchCarsByLicensePlate("AB-123")).thenReturn(cars);
+                when(carService.getCarByLicensePlate("AB-123")).thenReturn(carResponseDTO);
 
                 // Act & Assert
                 mockMvc.perform(get("/cars/search")
@@ -321,7 +307,7 @@ class CarControllerIntegrationTest {
                                 .andExpect(jsonPath("$.length()").value(1))
                                 .andExpect(jsonPath("$[0].licensePlate").value("AB-123-CD"));
 
-                verify(carService, times(1)).searchCarsByLicensePlate("AB-123");
+                verify(carService, times(1)).getCarByLicensePlate("AB-123");
         }
 
         @Test

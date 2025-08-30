@@ -42,12 +42,6 @@ public class CarController {
         return ResponseEntity.ok(car);
     }
 
-    @GetMapping("/license-plate/{licensePlate}")
-    public ResponseEntity<CarResponseDTO> getCarByLicensePlate(@PathVariable String licensePlate) {
-        CarResponseDTO car = carService.getCarByLicensePlate(licensePlate);
-        return ResponseEntity.ok(car);
-    }
-
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<CarResponseDTO>> getCarsByCustomerId(@PathVariable Long customerId) {
         List<CarResponseDTO> cars = carService.getCarsByCustomerId(customerId);
@@ -68,18 +62,6 @@ public class CarController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/search/brand/{brand}")
-    public ResponseEntity<List<CarResponseDTO>> searchCarsByBrand(@PathVariable String brand) {
-        List<CarResponseDTO> cars = carService.searchCarsByBrand(brand);
-        return ResponseEntity.ok(cars);
-    }
-
-    @GetMapping("/search/model/{model}")
-    public ResponseEntity<List<CarResponseDTO>> searchCarsByModel(@PathVariable String model) {
-        List<CarResponseDTO> cars = carService.searchCarsByModel(model);
-        return ResponseEntity.ok(cars);
-    }
-
     @GetMapping("/search")
     public ResponseEntity<List<CarResponseDTO>> searchCars(
             @RequestParam(required = false) String brand,
@@ -87,8 +69,9 @@ public class CarController {
             @RequestParam(required = false) String licensePlate) {
 
         if (licensePlate != null && !licensePlate.trim().isEmpty()) {
-            List<CarResponseDTO> cars = carService.searchCarsByLicensePlate(licensePlate);
-            return ResponseEntity.ok(cars);
+            // For license plate searches, return single car as list for consistency
+            CarResponseDTO car = carService.getCarByLicensePlate(licensePlate);
+            return ResponseEntity.ok(List.of(car));
         }
 
         if (brand != null && model != null) {

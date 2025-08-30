@@ -41,8 +41,21 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         final String jwt;
         final String username;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        // Let public endpoints pass through without token validation
+        String requestPath = request.getRequestURI();
+        if (requestPath.startsWith("/auth/") ||
+                requestPath.startsWith("/api-docs/") ||
+                requestPath.startsWith("/swagger-ui/") ||
+                requestPath.startsWith("/v3/api-docs/")) {
             filterChain.doFilter(request, response);
+            return;
+        }
+
+        // For protected endpoints, require Bearer token
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"Access denied\",\"message\":\"Authentication required\"}");
             return;
         }
 
@@ -68,6 +81,19 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             logger.error("Cannot set user authentication: {}", e);
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"Access denied\",\"message\":\"Invalid or expired token\"}");
+            return;
+        }
+
+        // Only continue if authentication was successful
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"Access denied\",\"message\":\"Authentication required\"}");
+            return;
         }
 
         filterChain.doFilter(request, response);

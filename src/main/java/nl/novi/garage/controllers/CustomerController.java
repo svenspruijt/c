@@ -58,21 +58,38 @@ public class CustomerController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<CustomerResponseDTO>> searchCustomers(@RequestParam String q) {
-        List<CustomerResponseDTO> customers = customerService.searchCustomers(q);
+    public ResponseEntity<List<CustomerResponseDTO>> searchCustomers(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String phone) {
+
+        if (phone != null && !phone.trim().isEmpty()) {
+            // Handle URL encoding: + symbols in phone numbers get converted to spaces
+            String decodedPhone = phone;
+            if (decodedPhone.startsWith(" ")) {
+                // Leading space indicates original + symbol
+                decodedPhone = "+" + decodedPhone.substring(1);
+            } else {
+                // Replace any other spaces with +
+                decodedPhone = decodedPhone.replace(" ", "+");
+            }
+
+            CustomerResponseDTO customer = customerService.getCustomerByPhoneNumber(decodedPhone);
+            return ResponseEntity.ok(List.of(customer));
+        }
+
+        if (q != null && !q.trim().isEmpty()) {
+            List<CustomerResponseDTO> customers = customerService.searchCustomers(q);
+            return ResponseEntity.ok(customers);
+        }
+
+        // If no search parameters provided, return all customers
+        List<CustomerResponseDTO> customers = customerService.getAllCustomers();
         return ResponseEntity.ok(customers);
     }
 
-    @GetMapping("/phone/{phoneNumber}")
-    public ResponseEntity<CustomerResponseDTO> getCustomerByPhoneNumber(@PathVariable String phoneNumber) {
-        CustomerResponseDTO customer = customerService.getCustomerByPhoneNumber(phoneNumber);
-        return ResponseEntity.ok(customer);
-    }
-
-    // Endpoint for adding a car to a customer (convenience method)
     @PostMapping("/{id}/cars")
     public ResponseEntity<String> addCarToCustomer(@PathVariable Long id) {
-        // This endpoint will delegate to CarController or return a message
         return ResponseEntity.ok("Use POST /cars endpoint to add a car to customer " + id);
     }
+
 }
