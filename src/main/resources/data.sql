@@ -75,3 +75,87 @@ INSERT INTO actions (name, description, price) VALUES
     ('Verlichting reparatie', 'Reparatie of vervanging van voor/achterlichten', 65.00),
     ('Koelsysteem spoelen', 'Koelsysteem doorspoelen en nieuwe koelvloeistof', 95.00),
     ('Startmotor reparatie', 'Reparatie of vervanging van startmotor', 185.00);
+
+-- Insert sample inspections
+INSERT INTO inspections (car_id, date, report, status, is_paid) VALUES
+    (1, '2024-01-15', 'APK keuring uitgevoerd. Auto voldoet aan alle eisen. Geen gebreken geconstateerd.', 'COMPLETED', true),
+    (2, '2024-01-22', 'APK keuring uitgevoerd. Kleine gebreken aan ruitenwissers en verlichting geconstateerd.', 'COMPLETED', true),
+    (3, '2024-02-05', 'APK keuring uitgevoerd. Ernstige gebreken aan remmen geconstateerd. Auto afgekeurd.', 'COMPLETED', false),
+    (4, '2024-02-12', 'APK keuring in uitvoering. Voorlopige bevindingen: mogelijke problemen met uitlaat.', 'IN_PROGRESS', false),
+    (5, '2024-02-18', 'APK keuring voltooid. Auto goedgekeurd met kleine aanbevelingen voor onderhoud.', 'COMPLETED', true),
+    (6, '2024-02-25', 'APK keuring uitgevoerd. Banden onder minimum profiel, vervangen vereist.', 'COMPLETED', false),
+    (7, '2024-03-01', 'APK keuring gepland voor vandaag. Wachten op beschikbaarheid monteur.', 'SCHEDULED', false),
+    (8, '2024-03-05', 'APK keuring voltooid. Geen gebreken. Auto in uitstekende staat.', 'COMPLETED', true),
+    (9, '2024-03-10', 'APK keuring uitgevoerd. Vervangen van koplampen vereist voor goedkeuring.', 'COMPLETED', false),
+    (10, '2024-03-15', 'APK keuring in voorbereiding. Auto wordt voorbereid voor keuring.', 'SCHEDULED', false);
+
+-- Insert sample repairs
+INSERT INTO repairs (car_id, date, status, report, is_paid) VALUES
+    (3, '2024-02-06', 'COMPLETED', 'Remblokken en remschijven vervangen. Auto weer veilig voor de weg.', true),
+    (2, '2024-01-23', 'COMPLETED', 'Ruitenwissers vervangen en verlichting gerepareerd na APK keuring.', true),
+    (6, '2024-02-26', 'IN_PROGRESS', 'Nieuwe banden besteld. Montage gepland voor morgen.', false),
+    (9, '2024-03-11', 'SCHEDULED', 'Koplampen besteld voor vervanging na APK keuring.', false),
+    (1, '2024-01-20', 'COMPLETED', 'Grote onderhoudsbeurt uitgevoerd. Alle vloeistoffen vervangen.', true),
+    (5, '2024-02-20', 'COMPLETED', 'Kleine onderhoudsbeurt en airco service uitgevoerd.', false),
+    (7, '2024-03-02', 'IN_PROGRESS', 'Diagnose motorproblemen lopende. Mogelijke koppeling problemen.', false),
+    (4, '2024-02-15', 'COMPLETED', 'Uitlaat demper vervangen na APK keuring. Probleem opgelost.', true),
+    (8, '2024-03-06', 'SCHEDULED', 'Distributieriem vervanging gepland voor volgende week.', false),
+    (10, '2024-03-12', 'COMPLETED', 'Accu vervangen en motor diagnose uitgevoerd.', false);
+
+-- Insert repair actions (linking repairs to standard actions)
+INSERT INTO repair_actions (repair_id, action_id, amount) VALUES
+    -- Repair 1 (car 3): Remmen vervangen
+    (1, 4, 1),  -- Remmen vervangen
+    -- Repair 2 (car 2): Ruitenwissers en verlichting
+    (2, 13, 1), -- Verlichting reparatie
+    -- Repair 4 (car 9): Koplampen
+    (4, 13, 1), -- Verlichting reparatie
+    -- Repair 5 (car 1): Grote beurt
+    (5, 3, 1),  -- Grote beurt
+    -- Repair 6 (car 5): Kleine beurt en airco
+    (6, 2, 1),  -- Kleine beurt
+    (6, 6, 1),  -- Airco service
+    -- Repair 7 (car 7): Motor diagnose
+    (7, 10, 1), -- Motor diagnose
+    -- Repair 8 (car 4): Uitlaat reparatie
+    (8, 9, 1),  -- Reparatie uitlaat
+    -- Repair 9 (car 8): Distributieriem
+    (9, 12, 1), -- Distributieriem
+    -- Repair 10 (car 10): Accu en diagnose
+    (10, 8, 1), -- Accu vervangen
+    (10, 10, 1); -- Motor diagnose
+
+-- Insert repair parts (linking repairs to parts used)
+INSERT INTO repair_parts (repair_id, part_id, amount) VALUES
+    -- Repair 1 (car 3): Remmen vervangen - remblokken en remschijven
+    (1, 1, 1),  -- Remblokken set
+    (1, 8, 1),  -- Remschijven vooras
+    -- Repair 2 (car 2): Ruitenwissers vervangen
+    (2, 5, 1),  -- Ruitenwissers
+    -- Repair 4 (car 9): Koplampen vervangen
+    (4, 17, 1), -- Koplampen set
+    -- Repair 5 (car 1): Grote beurt - olie, filters
+    (5, 2, 1),  -- Motorolie 5W-30
+    (5, 3, 1),  -- Luchtfilter
+    (5, 12, 1), -- Brandstoffilter
+    (5, 13, 1), -- Koelvloeistof
+    -- Repair 6 (car 5): Kleine beurt - alleen olie
+    (6, 2, 1),  -- Motorolie 5W-30
+    -- Repair 8 (car 4): Uitlaat demper vervangen
+    (8, 11, 1), -- Uitlaat demper
+    -- Repair 9 (car 8): Distributieriem
+    (9, 9, 1),  -- Distributieriem
+    -- Repair 10 (car 10): Accu vervangen
+    (10, 6, 1); -- Accu 12V
+
+-- Insert custom repair actions (specific work not covered by standard actions)
+INSERT INTO repair_custom_actions (repair_id, description, price) VALUES
+    (1, 'Extra controle wielophanging na remmen reparatie', 25.00),
+    (2, 'Reiniging koplampen voor betere lichtopbrengst', 15.00),
+    (3, 'Speciale banden uitlijning na vervangen', 35.00),
+    (5, 'Controle en bijstellen carburateur', 45.00),
+    (6, 'Reiniging luchtfilter behuizing', 20.00),
+    (7, 'Uitgebreide computerdiagnose transmissie', 65.00),
+    (8, 'Controle en reiniging katalysator', 55.00),
+    (9, 'Controle waterpomp tijdens distributieriem vervanging', 40.00),
+    (10, 'Controle en testen elektrische bedrading', 30.00);
