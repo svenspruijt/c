@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.util.List;
+
 @Entity
 @Table(name = "cars")
 public class Car {
@@ -34,6 +36,9 @@ public class Car {
     @Size(min = 4, max = 10, message = "License plate must be between 4 and 10 characters")
     @Column(name = "license_plate", unique = true, nullable = false)
     private String licensePlate;
+
+    @OneToMany(mappedBy = "car", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CarDocument> documents;
 
     // Constructors
     public Car() {
@@ -85,6 +90,14 @@ public class Car {
 
     public void setLicensePlate(String licensePlate) {
         this.licensePlate = licensePlate;
+    }
+
+    public List<CarDocument> getDocuments() {
+        return documents;
+    }
+
+    public void setDocuments(List<CarDocument> documents) {
+        this.documents = documents;
     }
 
     @Override
