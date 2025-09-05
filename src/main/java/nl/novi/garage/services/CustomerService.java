@@ -46,7 +46,7 @@ public class CustomerService {
     public List<CustomerResponseDTO> getAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
         return customers.stream()
-                .map(this::mapToResponseDTO)
+                .map(this::mapToResponseDTOWithCars)
                 .collect(Collectors.toList());
     }
 
@@ -93,7 +93,7 @@ public class CustomerService {
         List<Customer> customers = customerRepository.findByNameContainingIgnoreCaseOrPhonenumberContaining(query,
                 query);
         return customers.stream()
-                .map(this::mapToResponseDTO)
+                .map(this::mapToResponseDTOWithCars)
                 .collect(Collectors.toList());
     }
 
